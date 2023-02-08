@@ -10,23 +10,23 @@ A bash shell. Most Unix-based systems have this installed by default.
 Installation
 Clone the repository to your local system:
 
-'''
+```
 git clone https://github.com/YOUR_USERNAME/bash-scripting-project.git
-'''
+```
 
 Go to the repository directory:
 
-'''
+```
 cd bash-scripting-project
-'''
+```
 
 ## Running the scripts
 You can run a script by giving the execution permissions to the script file and then running it:
 
-'''
+```
 chmod +x script_name.sh
 ./script_name.sh
-'''
+```
 
 ## Scripts
 The following scripts are included in the project:
