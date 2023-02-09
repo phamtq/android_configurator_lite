@@ -18,7 +18,7 @@
 #
 #	sed -r 's/\s+//g'	Again, use sed to remove whitespaces
 
-SERIAL=$(./adb devices | sed -n '2 p'| sed -e 's/\device//g' | sed -r 's/\s+//g')
+SERIAL=$(./platform-tools/adb devices | sed -n '2 p'| sed -e 's/\device//g' | sed -r 's/\s+//g')
 
 # Use that serial number as a parameter to install the .apk's to the phone
 #
@@ -31,9 +31,9 @@ then
 else
 	# Install Ampere to measure battery health
 	echo "Installing Ampere..."
-	./adb -s $SERIAL install com.gombosdev.ampere.apk
+	./platform-tools/adb -s $SERIAL install ./platform-tools/com.gombosdev.ampere.apk
 
 	#Use PhoneDoctorPlus to run the rest of the tests
 	echo "Installing PhoneDoctorPlus..."
-	./adb -s $SERIAL install com.idea.PhoneDoctorPlus.apk
+	./platform-tools/adb -s $SERIAL install ./platform-tools/com.idea.PhoneDoctorPlus.apk
 fi
