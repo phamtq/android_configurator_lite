@@ -18,22 +18,32 @@
 #
 #	sed -r 's/\s+//g'	Again, use sed to remove whitespaces
 
-SERIAL=$(./platform-tools/adb devices | sed -n '2 p'| sed -e 's/\device//g' | sed -r 's/\s+//g')
+SERIAL_LIST=$(./platform-tools/adb devices | awk '($2 == "device") { print $1 }')
+SERIAL_COUNT=$(echo "${SERIAL_LIST}" | grep -c "^")
 
 # Use that serial number as a parameter to install the .apk's to the phone
 #
 
+# Colorization
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NOCOLOR='\033[0m'
+
 # Check to see if the ADB command was able to sucessfully connect to the phone
-if [[ -z "$SERIAL" ]]
+if [[ -z "$SERIAL_LIST" ]]
 then
-	echo "An error occurred (did you enable USB debugging on the phone?)"
+	echo -e "${RED}An error occurred${NOCOLOR} (did you enable USB debugging on the phone?)"
 	exit 1
 else
-	# Install Ampere to measure battery health
-	echo "Installing Ampere..."
-	./platform-tools/adb -s $SERIAL install ./platform-tools/com.gombosdev.ampere.apk
+	for (( i=1; i<=$SERIAL_COUNT; i++ ))
+	do
+		# Install Ampere to measure battery health
+		echo "Device ${i} with serial number: $(sed -n ${i}p <<< "$SERIAL_LIST")"
+		echo -e "${GREEN}Installing Ampere...${NOCOLOR}"
+		./platform-tools/adb -s $(sed -n ${i}p <<< "$SERIAL_LIST") install ./platform-tools/com.gombosdev.ampere.apk
 
-	#Use PhoneDoctorPlus to run the rest of the tests
-	echo "Installing PhoneDoctorPlus..."
-	./platform-tools/adb -s $SERIAL install ./platform-tools/com.idea.PhoneDoctorPlus.apk
+		#Use PhoneDoctorPlus to run the rest of the tests
+		echo -e "${GREEN}Installing PhoneDoctorPlus...${NOCOLOR}"
+		./platform-tools/adb -s $(sed -n ${i}p <<< "$SERIAL_LIST") install ./platform-tools/com.idea.PhoneDoctorPlus.apk
+	done
 fi
