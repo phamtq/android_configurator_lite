@@ -27,6 +27,7 @@ SERIAL_COUNT=$(echo "${SERIAL_LIST}" | grep -c "^")
 # Colorization
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
 NOCOLOR='\033[0m'
 
 # Check to see if the ADB command was able to sucessfully connect to the phone
@@ -42,8 +43,10 @@ else
 		echo -e "${GREEN}Installing Ampere...${NOCOLOR}"
 		./platform-tools/adb -s $(sed -n ${i}p <<< "$SERIAL_LIST") install ./platform-tools/com.gombosdev.ampere.apk
 
-		#Use PhoneDoctorPlus to run the rest of the tests
+		# Use PhoneDoctorPlus to run the rest of the tests
 		echo -e "${GREEN}Installing PhoneDoctorPlus...${NOCOLOR}"
 		./platform-tools/adb -s $(sed -n ${i}p <<< "$SERIAL_LIST") install ./platform-tools/com.idea.PhoneDoctorPlus.apk
+		# Display the IMEI to check for an unclean ESN
+		echo -e "${YELLOW}IMEI: $(./platform-tools/adb shell service call iphonesubinfo 4 | awk -F"'" 'NR>1 { gsub(/\./,"",$2); imei=imei $2 } END {print imei}') ${NOCOLOR}"
 	done
 fi
