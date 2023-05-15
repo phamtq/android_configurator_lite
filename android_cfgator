@@ -7,30 +7,21 @@
 # This BASH script runs the ADB command to show the serial numbers of the connected devices
 # and it uses that to run commands which install the 2 Android apps we use for testing.
 
-
-# Grab the serial number from the output
-# Command line explanation:
-#	./adb devices 		Uses the ADB app to generated a list devices:
-#				List of devices attached
-#				XXXXXXXXXXXX     devices
-#
-#	sed -n '2 p'		Uses the sed command to display the 2nd line
-#
-#	sed -r 's/\s+//g'	Again, use sed to remove whitespaces
-
-SERIAL_LIST=$(./platform-tools/adb devices | awk '($2 == "device") { print $1 }')
-SERIAL_COUNT=$(echo "${SERIAL_LIST}" | grep -c "^")
-
-# Use that serial number as a parameter to install the .apk's to the phone
-#
-
 # Colorization
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NOCOLOR='\033[0m'
 
-# Check to see if the ADB command was able to sucessfully connect to the phone
+# Grab the serial number from the output
+SERIAL_LIST=$(./platform-tools/adb devices | awk '($2 == "device") { print $1 }')
+
+# Count the number of unique devices there are to determine how many times to run through
+# the script. Use those serial number as a parameter to install the .apk's to the phone
+SERIAL_COUNT=$(echo "${SERIAL_LIST}" | grep -c "^")
+
+# Check to see if the ADB command was able to sucessfully connect to the phone. If the
+# variable is empty, then it's likely it didn't suceeed in grabbing the serial numbers.
 if [[ -z "$SERIAL_LIST" ]]
 then
 	echo -e "${RED}An error occurred${NOCOLOR} (did you enable USB debugging on the phone?)"
@@ -46,7 +37,8 @@ else
 		# Use PhoneDoctorPlus to run the rest of the tests
 		echo -e "${GREEN}Installing PhoneDoctorPlus...${NOCOLOR}"
 		./platform-tools/adb -s $(sed -n ${i}p <<< "$SERIAL_LIST") install ./platform-tools/com.idea.PhoneDoctorPlus.apk
-		# Display the IMEI to check for an unclean ESN
+		# Display the IMEI to check for an unclean ESN, only works with certain Android
+		# OS versions.
 		echo -e "${YELLOW}IMEI: $(./platform-tools/adb shell service call iphonesubinfo 4 | awk -F"'" 'NR>1 { gsub(/\./,"",$2); imei=imei $2 } END {print imei}') ${NOCOLOR}"
 	done
 fi
